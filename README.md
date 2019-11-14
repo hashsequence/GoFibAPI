@@ -78,8 +78,7 @@ The Api handles the 3 endpoints:
 Design
 ===============================
 
-I had multiple assumptions I made, since the prompt wasn't specific
-about multiple client requests. I made an assumption that the Fibonacci
+I made an assumption that the Fibonacci
 number is shared among clients, so if 3 clients calls next and the current was
 0, then the callers will get 1,1,2 with respect to order
 
