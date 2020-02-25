@@ -75,6 +75,13 @@ The Api handles the 3 endpoints:
 
     * **Code:** 500 StatusInternalServerError <br />
 
+Purpose
+==============================
+* The purpose of this project was to showcase how to:
+  * make a simple Api and be able to deploy it using dep onto heroku
+  * I wanted to able to dockerize it and push it on to dockerhub
+
+
 Design
 ===============================
 
