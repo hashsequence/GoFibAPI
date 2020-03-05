@@ -1,0 +1,38 @@
+version: '3.6'
+
+services:
+  goservice:
+    build:
+      #This defines the build context for the application image build. In this case, it’s the current project directory.
+      context: ./gofibapi
+      #This specifies the Dockerfile that Compose will use for the build 
+      dockerfile: Dockerfile
+    #image: gofibapi
+    ports:
+      - "8080"
+    container_name: goservice
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  webserver:
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile
+    #image: webserver
+    container_name: webserver
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      #This will bind mount the Nginx configuration directory on the host to the relevant directory on the container, ensuring that any changes we make to files on the host will be reflected in the container.
+      - ./nginx:/etc/nginx/
+    depends_on:
+      - goservice
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -1,0 +1,74 @@
+version: '3'
+
+services:
+  gofibapi:
+    build:
+      #This defines the build context for the application image build. In this case, it’s the current project directory.
+      context: ./gofibapi
+      #This specifies the Dockerfile that Compose will use for the build 
+      dockerfile: Dockerfile
+    image: gofibapi
+    container_name: gofibapi
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  webserver:
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: webserver
+    container_name: webserver
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      #This will bind mount the Nginx configuration directory on the host to the relevant directory on the container, ensuring that any changes we make to files on the host will be reflected in the container.
+      - ./nginx:/etc/nginx/conf.d
+      #This will mount the relevant Let’s Encrypt certificates and keys for our domain to the appropriate directory on the container.
+      - certbot-etc:/etc/letsencrypt
+      #This mounts Let’s Encrypt’s default working directory to the appropriate directory on the container.
+      - certbot-var:/var/lib/letsencrypt
+      - dhparam:/etc/ssl/certs
+    depends_on:
+      - gofibapi
+    networks:
+      - app-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/html
+    depends_on:
+      - webserver
+      
+
+      #webroot: This tells Certbot to use the webroot plugin to place files in the webroot folder for authentication.
+      #webroot-path: This specifies the path of the webroot directory.
+      #email: Your preferred email for registration and recovery.
+      #agree-tos: This specifies that you agree to ACME’s Subscriber Agreement.
+      #no-eff-email: This tells Certbot that you do not wish to share your email with the Electronic Frontier Foundation (EFF). Feel free to omit this if you would prefer.
+      #staging: This tells Certbot that you would like to use Let’s Encrypt’s staging environment to obtain test certificates. Using this option allows you to test your configuration options and avoid possible domain request limits. For more information about these limits, please see Let’s Encrypt’s rate limits documentation.
+      #d: This allows you to specify domain names you would like to apply to your request. In this case, we’ve included example.com and www.example.com. Be sure to replace these with your own domain preferences.
+      #--force-renewal flag, which will tell Certbot that you want to request a new certificate with the same domains as an existing certificate.
+    command: certonly --webroot --webroot-path=/var/www/html --email rebellion.ave@gmail.com --agree-tos --no-eff-email --force-renewal -d www.needdomainnameforcertbot.com
+
+volumes:
+  certbot-etc:
+  certbot-var:
+  web-root:
+    driver: local
+    #if you have statis asset you can use this
+  dhparam:
+    driver_opts:
+      type: none
+      device: /home/avwong13/GoFibAPI/goApiDockerSecured/dhparam
+      o: bind
+
+networks:
+  app-network:
+    driver: bridge

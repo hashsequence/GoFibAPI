@@ -80,6 +80,7 @@ Purpose
 * The purpose of this project was to showcase how to:
   * make a simple Api and be able to deploy it using dep onto heroku
   * I wanted to able to dockerize it and push it on to dockerhub
+  * add nginx for ssl and reverse proxy endpoint (using self signed ssl certificates)
 
 
 Design
